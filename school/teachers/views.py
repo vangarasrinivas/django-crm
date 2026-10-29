@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 from .models import Teacher
 
 # Create your views here.
@@ -21,3 +22,24 @@ def add_teacher(request):
     return render(request, 'index.html')
 
 
+def update_teacher(request, teacher_id):
+    teacher = Teacher.objects.get(id=teacher_id)
+    if request.method == 'POST':
+        teacher.name = request.POST.get('name')
+        teacher.email = request.POST.get('email')
+        teacher.contact_number = request.POST.get('contact_number')
+        teacher.subject = request.POST.get('subject')
+        image = request.FILES.get('image')
+        if image:
+            teacher.image = image
+        teacher.save()
+        return redirect('teachers_list')
+    return render(request, 'index.html', {'teacher': teacher})
+
+
+
+@require_POST
+def delete_teacher(request, teacher_id):
+    teacher = get_object_or_404(Teacher, id=teacher_id)
+    teacher.delete()
+    return redirect('teachers_list')
